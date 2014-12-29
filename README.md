@@ -8,6 +8,6 @@ This library is aimed at being a proof of concept and nothing more. It's not int
 int main() {
     auto x = inom::make_int<1>();
     auto y = inom::make_int<2>();
-    std::cout << (x + y); // 2
+    std::cout << (x + y); // 3
 }
 ```
