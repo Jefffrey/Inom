@@ -14,15 +14,6 @@ TEST_CASE("inom::make_int") {
 
 TEST_CASE("inom::integer") {
 
-    SECTION("access to the underlying data") {
-        inom::integer<-3, 5> x = inom::make_int<2>();
-        inom::integer<0, 0> y = inom::make_int<0>();
-        inom::integer<4, 9> z = inom::make_int<7>();
-        REQUIRE(x.data() == 2);
-        REQUIRE(y.data() == 0);
-        REQUIRE(z.data() == 7);
-    }
-
     SECTION("can be default constructed") {
         inom::integer<-4, 0> x;
         inom::integer<0, 123> y;
@@ -32,14 +23,33 @@ TEST_CASE("inom::integer") {
         REQUIRE(z.data() == 0);
     }
 
+    SECTION("can be instantiated as a literal") {
+        using namespace inom::literals;
+        auto x = 123_int;
+        auto y = 123_int;
+        REQUIRE(x == y);
+        REQUIRE(x.data() == 123);
+    }
+
+    SECTION("access to the underlying data") {
+        using namespace inom::literals;
+        inom::integer<-3, 5> x = 2_int;
+        inom::integer<0, 0> y = 0_int;
+        inom::integer<4, 9> z = 7_int;
+        REQUIRE(x.data() == 2);
+        REQUIRE(y.data() == 0);
+        REQUIRE(z.data() == 7);
+    }
+
     SECTION("equality works") {
-        auto x = inom::make_int<345>();
+        using namespace inom::literals;
+        auto x = 345_int;
         auto y = x;
-        auto z = inom::make_int<300>();
+        auto z = 300_int;
         inom::integer<123, 1002> w = z;
-        inom::integer<-1, 4> p = inom::make_int<-1>();
-        inom::integer<45, 301> q = inom::make_int<300>();
-        inom::integer<280, 1200> r = inom::make_int<300>();
+        inom::integer<-1, 4> p = -1_int;
+        inom::integer<45, 301> q = 300_int;
+        inom::integer<280, 1200> r = 300_int;
 
         REQUIRE(x == y);
         REQUIRE((x != y) == false);
@@ -58,8 +68,9 @@ TEST_CASE("inom::integer") {
     }
 
     SECTION("addition works") {
-        inom::integer<-3, -1> x = inom::make_int<-1>();
-        inom::integer<-6, 19> y = inom::make_int<6>();
+        using namespace inom::literals;
+        inom::integer<-3, -1> x = -1_int;
+        inom::integer<-6, 19> y = 6_int;
         auto z = x + y;
 
         static_assert(
@@ -73,8 +84,9 @@ TEST_CASE("inom::integer") {
     }
 
     SECTION("subtraction works") {
-        inom::integer<-3, -1> x = inom::make_int<-1>();
-        inom::integer<-6, 19> y = inom::make_int<6>();
+        using namespace inom::literals;
+        inom::integer<-3, -1> x = -1_int;
+        inom::integer<-6, 19> y = 6_int;
         auto z = x - y;
 
         static_assert(
@@ -88,7 +100,8 @@ TEST_CASE("inom::integer") {
     }
 
     SECTION("can be created from a more strict integer") {
-        inom::integer<0, 11> x = inom::make_int<5>();
+        using namespace inom::literals;
+        inom::integer<0, 11> x = 5_int;
         inom::integer<0, 23> y = x;
         REQUIRE(x == y);
     }

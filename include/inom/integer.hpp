@@ -4,6 +4,7 @@
 #include <type_traits>
 #include "aliases.hpp"
 #include "detail/repr_for.hpp"
+#include "detail/strtoi.hpp"
 #include "detail/constexpr.hpp"
 
 namespace inom {
@@ -80,6 +81,20 @@ integer<I, I> make_int() {
     return integer<I, I>(I);
 }
 
+namespace literals {
+
+template <char... Chars>
+integer<
+    detail::strtoi<Chars...>::value, 
+    detail::strtoi<Chars...>::value
+> 
+operator "" _int() {
+    constexpr intdata_t I = detail::strtoi<Chars...>::value;
+    return make_int<I>();
+}
+
+} // namespace literals
+
 template<intdata_t A, intdata_t B, intdata_t C, intdata_t D>
 integer<A + C, B + D> operator+(integer<A, B> const& a, integer<C, D> const& b) {
     return integer<A + C, B + D>(a.data() + b.data());
@@ -88,6 +103,12 @@ integer<A + C, B + D> operator+(integer<A, B> const& a, integer<C, D> const& b) 
 template<intdata_t A, intdata_t B, intdata_t C, intdata_t D>
 integer<A - D, B - C> operator-(integer<A, B> const& a, integer<C, D> const& b) {
     return integer<A - D, B - C>(a.data() - b.data());
+}
+
+template<intdata_t A, intdata_t B>
+integer<-A, -B> operator-(integer<A, B> const& a) {
+    using namespace literals;
+    return 0_int - a;
 }
 
 template<intdata_t A, intdata_t B, intdata_t C, intdata_t D>

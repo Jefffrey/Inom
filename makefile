@@ -1,4 +1,4 @@
-CC				:= g++
+CC				:= clang++
 RM				:= rm
 SUITE_EXE 		:= suite
 SUITE_CPP_FILES	:= $(wildcard test/*.cpp)\
