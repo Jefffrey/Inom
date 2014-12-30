@@ -44,6 +44,7 @@ public:
         typename std::enable_if<(F <= A && T >= B), int>::type = 0
     >
     integer(integer<A, B> const& o) : repr(o.repr + (integer<A, B>::pivot - pivot)) {}
+    integer(integer const&) = default;
     integer(integer&&) = default;
     
     template<
@@ -51,7 +52,10 @@ public:
         typename std::enable_if<(A <= F && B >= T), int>::type = 0
     >
     integer& operator=(integer<A, B> const& o) { repr = o.repr + (pivot - integer<A, B>::pivot); }
+    integer& operator=(integer const&) = default;
     integer& operator=(integer&&) = default;
+
+    repr_t data() const { return pivot + repr; }
 };
 
 template<max_n I>
@@ -62,6 +66,21 @@ integer<I, I> make_int() {
 template<max_n A, max_n B, max_n C, max_n D>
 integer<A + C, B + D> operator+(integer<A, B> const& a, integer<C, D> const& b) {
     return integer<A + C, B + D>(a.repr + b.repr);
+}
+
+template<max_n A, max_n B, max_n C, max_n D>
+integer<A - D, B - C> operator-(integer<A, B> const& a, integer<C, D> const& b) {
+    return integer<A - D, B - C>(a.repr - b.repr);
+}
+
+template<max_n A, max_n B, max_n C, max_n D>
+bool operator==(integer<A, B> const& a, integer<C, D> const& b) {
+    return a.data() == b.data();
+}
+
+template<max_n A, max_n B, max_n C, max_n D>
+bool operator!=(integer<A, B> const& a, integer<C, D> const& b) {
+    return !(a == b); 
 }
 
 template<max_n A, max_n B>
