@@ -2,110 +2,105 @@
 
 #include <ostream>
 #include <type_traits>
-#include "util.hpp"
+#include "aliases.hpp"
+#include "detail/repr_for.hpp"
+#include "detail/constexpr.hpp"
 
 namespace inom {
 
-using detail::max_n;
-
-namespace detail {
-
-    constexpr max_n offset_to_data(max_n pivot, max_n offset) {
-        return pivot + offset;
-    }
-
-    constexpr max_n data_to_offset(max_n pivot, max_n data) {
-        return data - pivot;
-    }
-
-}
-
-template<max_n F, max_n T = F>
+template<intdata_t L, intdata_t R = L>
 class integer {
 public:
-    using repr_t = 
-        typename detail::repr_for<
-            detail::constexpr_abs(T - F)
-        >::type;
-    static constexpr max_n pivot = F;
+    using data_t = intdata_t;
+    static constexpr data_t lbound = L;
+    static constexpr data_t rbound = R;
 private:
-    repr_t offset;
+    using offset_t = 
+        typename detail::repr_for<
+            detail::abs(R - L)
+        >::type;
+    static constexpr data_t pivot = L;
+
+    data_t to_data(offset_t offset) const { return pivot + offset; }
+    data_t to_offset(data_t data) const { return data - pivot; }
+
+    offset_t offset;
     
-    explicit integer(max_n data) 
-        : offset(detail::data_to_offset(pivot, data)) {}
+    explicit integer(data_t data) 
+        : offset(to_offset(data)) {}
     
-    template<max_n I>
+    template<data_t I>
     friend integer<I, I> make_int();
     
-    template<max_n A, max_n B>
+    template<data_t A, data_t B>
     friend class integer;
     
-    template<max_n A, max_n B, max_n C, max_n D>
+    template<data_t A, data_t B, data_t C, data_t D>
     friend integer<A + C, B + D> operator+(integer<A, B> const&, integer<C, D> const&);
     
-    template<max_n A, max_n B, max_n C, max_n D>
+    template<data_t A, data_t B, data_t C, data_t D>
     friend integer<A - D, B - C> operator-(integer<A, B> const&, integer<C, D> const&);
 
-    template<max_n A, max_n B>
+    template<data_t A, data_t B>
     friend std::ostream& operator<<(std::ostream&, integer<A, B> const&);
 public:
 
     template<
-        bool B = (F <= 0 && T >= 0),
+        bool B = (L <= 0 && R >= 0),
         typename std::enable_if<B, int>::type = 0
     >
     integer() : integer(0) {}
     
     template<
-        max_n A, max_n B,
-        typename std::enable_if<(F <= A && T >= B), int>::type = 0
+        data_t A, data_t B,
+        typename std::enable_if<(L <= A && R >= B), int>::type = 0
     >
     integer(integer<A, B> const& o) : integer(o.data()) {}
     integer(integer const&) = default;
     integer(integer&&) = default;
     
     template<
-        max_n A, max_n B,
-        typename std::enable_if<(A <= F && B >= T), int>::type = 0
+        data_t A, data_t B,
+        typename std::enable_if<(A <= L && B >= R), int>::type = 0
     >
     integer& operator=(integer<A, B> const& o) { 
-        offset = detail::data_to_offset(pivot, o.data()); 
+        offset = to_offset(o.data()); 
     }
 
     integer& operator=(integer const&) = default;
     integer& operator=(integer&&) = default;
 
-    max_n data() const { 
-        return detail::offset_to_data(pivot, offset); 
+    data_t data() const { 
+        return to_data(offset); 
     }
 };
 
-template<max_n I>
+template<intdata_t I>
 integer<I, I> make_int() {
     return integer<I, I>(I);
 }
 
-template<max_n A, max_n B, max_n C, max_n D>
+template<intdata_t A, intdata_t B, intdata_t C, intdata_t D>
 integer<A + C, B + D> operator+(integer<A, B> const& a, integer<C, D> const& b) {
     return integer<A + C, B + D>(a.data() + b.data());
 }
 
-template<max_n A, max_n B, max_n C, max_n D>
+template<intdata_t A, intdata_t B, intdata_t C, intdata_t D>
 integer<A - D, B - C> operator-(integer<A, B> const& a, integer<C, D> const& b) {
     return integer<A - D, B - C>(a.data() - b.data());
 }
 
-template<max_n A, max_n B, max_n C, max_n D>
+template<intdata_t A, intdata_t B, intdata_t C, intdata_t D>
 bool operator==(integer<A, B> const& a, integer<C, D> const& b) {
     return a.data() == b.data();
 }
 
-template<max_n A, max_n B, max_n C, max_n D>
+template<intdata_t A, intdata_t B, intdata_t C, intdata_t D>
 bool operator!=(integer<A, B> const& a, integer<C, D> const& b) {
     return !(a == b); 
 }
 
-template<max_n A, max_n B>
+template<intdata_t A, intdata_t B>
 std::ostream& operator<<(std::ostream& os, integer<A, B> const& x) {
     return (os << x.data());
 }

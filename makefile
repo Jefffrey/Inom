@@ -1,7 +1,9 @@
 CC				:= g++
 RM				:= rm
 SUITE_EXE 		:= suite
-SUITE_CPP_FILES	:= $(wildcard test/*.cpp) $(wildcard test/inom/*.cpp)
+SUITE_CPP_FILES	:= $(wildcard test/*.cpp)\
+				   $(wildcard test/inom/*.cpp)\
+				   $(wildcard test/inom/detail/*.cpp)
 SUITE_OBJ_FILES	:= $(SUITE_CPP_FILES:.cpp=.o)
 LD_FLAGS		:=
 CC_FLAGS		:= -std=c++11 -O2 -ferror-limit=1

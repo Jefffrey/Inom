@@ -2,24 +2,17 @@
 
 #include <cstdint>
 #include <type_traits>
+#include "../aliases.hpp"
 
 namespace inom {
 namespace detail {
 
-using max_n = std::int64_t;
-
-constexpr max_n constexpr_abs(max_n i) {
-    return (i < 0)
-        ? -i
-        : i;
-}
-
-template<max_n N, typename _ = void>
+template<intdata_t N, typename _ = void>
 struct repr_for {
     using type = std::uint8_t;
 };
 
-template<max_n N>
+template<intdata_t N>
 struct repr_for<
     N, 
     typename std::enable_if<(N > UINT8_MAX && N < UINT16_MAX)>::type
@@ -27,7 +20,7 @@ struct repr_for<
     using type = std::uint16_t;
 };
 
-template<max_n N>
+template<intdata_t N>
 struct repr_for<
     N, 
     typename std::enable_if<(N > UINT16_MAX && N < UINT32_MAX)>::type
@@ -36,7 +29,7 @@ struct repr_for<
 };
 
 
-template<max_n N>
+template<intdata_t N>
 struct repr_for<
     N, 
     typename std::enable_if<(N > UINT32_MAX)>::type
