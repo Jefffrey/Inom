@@ -8,6 +8,18 @@ namespace inom {
 
 using detail::max_n;
 
+namespace detail {
+
+    constexpr max_n offset_to_data(max_n pivot, max_n offset) {
+        return pivot + offset;
+    }
+
+    constexpr max_n data_to_offset(max_n pivot, max_n data) {
+        return data - pivot;
+    }
+
+}
+
 template<max_n F, max_n T = F>
 class integer {
 public:
@@ -17,9 +29,10 @@ public:
         >::type;
     static constexpr max_n pivot = F;
 private:
-    repr_t repr;
+    repr_t offset;
     
-    integer(repr_t i) : repr(i) {}
+    explicit integer(max_n data) 
+        : offset(detail::data_to_offset(pivot, data)) {}
     
     template<max_n I>
     friend integer<I, I> make_int();
@@ -31,19 +44,23 @@ private:
     friend integer<A + C, B + D> operator+(integer<A, B> const&, integer<C, D> const&);
     
     template<max_n A, max_n B, max_n C, max_n D>
-    friend integer<A - C, B - D> operator-(integer<A, B> const&, integer<C, D> const&);
+    friend integer<A - D, B - C> operator-(integer<A, B> const&, integer<C, D> const&);
 
     template<max_n A, max_n B>
     friend std::ostream& operator<<(std::ostream&, integer<A, B> const&);
 public:
 
-    integer() : repr(-F) {}
+    template<
+        bool B = (F <= 0 && T >= 0),
+        typename std::enable_if<B, int>::type = 0
+    >
+    integer() : integer(0) {}
     
     template<
         max_n A, max_n B,
         typename std::enable_if<(F <= A && T >= B), int>::type = 0
     >
-    integer(integer<A, B> const& o) : repr(o.repr + (integer<A, B>::pivot - pivot)) {}
+    integer(integer<A, B> const& o) : integer(o.data()) {}
     integer(integer const&) = default;
     integer(integer&&) = default;
     
@@ -51,26 +68,31 @@ public:
         max_n A, max_n B,
         typename std::enable_if<(A <= F && B >= T), int>::type = 0
     >
-    integer& operator=(integer<A, B> const& o) { repr = o.repr + (pivot - integer<A, B>::pivot); }
+    integer& operator=(integer<A, B> const& o) { 
+        offset = detail::data_to_offset(pivot, o.data()); 
+    }
+
     integer& operator=(integer const&) = default;
     integer& operator=(integer&&) = default;
 
-    repr_t data() const { return pivot + repr; }
+    max_n data() const { 
+        return detail::offset_to_data(pivot, offset); 
+    }
 };
 
 template<max_n I>
 integer<I, I> make_int() {
-    return integer<I, I>(0);
+    return integer<I, I>(I);
 }
 
 template<max_n A, max_n B, max_n C, max_n D>
 integer<A + C, B + D> operator+(integer<A, B> const& a, integer<C, D> const& b) {
-    return integer<A + C, B + D>(a.repr + b.repr);
+    return integer<A + C, B + D>(a.data() + b.data());
 }
 
 template<max_n A, max_n B, max_n C, max_n D>
 integer<A - D, B - C> operator-(integer<A, B> const& a, integer<C, D> const& b) {
-    return integer<A - D, B - C>(a.repr - b.repr);
+    return integer<A - D, B - C>(a.data() - b.data());
 }
 
 template<max_n A, max_n B, max_n C, max_n D>
@@ -85,7 +107,7 @@ bool operator!=(integer<A, B> const& a, integer<C, D> const& b) {
 
 template<max_n A, max_n B>
 std::ostream& operator<<(std::ostream& os, integer<A, B> const& x) {
-    return (os << (integer<A, B>::pivot + x.repr));
+    return (os << x.data());
 }
 
 } // namespace inom

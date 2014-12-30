@@ -1,6 +1,7 @@
 #include "../../ext/catch.hpp"
 #include "../../include/inom/integer.hpp"
 #include <type_traits>
+#include <cstdint>
 
 TEST_CASE("inom::make_int") {
 
@@ -23,7 +24,7 @@ TEST_CASE("inom::integer") {
     }
 
     SECTION("can be default constructed") {
-        inom::integer<123, 123> x;
+        inom::integer<-4, 0> x;
         inom::integer<0, 123> y;
         inom::integer<-3, 8> z;
         REQUIRE(x.data() == 0);
@@ -48,12 +49,42 @@ TEST_CASE("inom::integer") {
         REQUIRE((z != w) == false);
         REQUIRE(p != w);
         REQUIRE((p == w) == false);
-        REQUIRE(p == w);
-        REQUIRE((p != w) == false);
-        REQUIRE(p == r);
-        REQUIRE((p != r) == false);
+        REQUIRE(z == w);
+        REQUIRE((z != w) == false);
+        REQUIRE(z == r);
+        REQUIRE((z != r) == false);
         REQUIRE(r == w);
         REQUIRE((r != w) == false);
+    }
+
+    SECTION("addition works") {
+        inom::integer<-3, -1> x = inom::make_int<-1>();
+        inom::integer<-6, 19> y = inom::make_int<6>();
+        auto z = x + y;
+
+        static_assert(
+            std::is_same<
+                decltype(z),
+                inom::integer<-9, 18>
+            >::value,
+            "addition type mismatch"
+        );
+        REQUIRE(z.data() == 5);
+    }
+
+    SECTION("subtraction works") {
+        inom::integer<-3, -1> x = inom::make_int<-1>();
+        inom::integer<-6, 19> y = inom::make_int<6>();
+        auto z = x - y;
+
+        static_assert(
+            std::is_same<
+                decltype(z),
+                inom::integer<-22, 5>
+            >::value,
+            "subtraction type mismatch"
+        );
+        REQUIRE(z.data() == -7);
     }
 
     SECTION("can be created from a more strict integer") {
@@ -61,7 +92,5 @@ TEST_CASE("inom::integer") {
         inom::integer<0, 23> y = x;
         REQUIRE(x == y);
     }
-
-
 
 }
