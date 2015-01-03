@@ -21,4 +21,9 @@ struct includes_negatives {
     static constexpr bool value = (Range::lbound < 0);
 };
 
+template<class Range>
+struct is_singleton {
+    static constexpr bool value = (Range::lbound == Range::rbound);
+};
+
 } // namespace inom

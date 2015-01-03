@@ -99,6 +99,32 @@ TEST_CASE("inom::integer") {
         REQUIRE(z.data() == -7);
     }
 
+    SECTION("multiplication works") {
+        using namespace inom::literals;
+        inom::i<3, 4> x = 4_int;
+        inom::i<-4, 9> y = -3_int;
+        auto z = 0_int;
+        auto a = x * y;
+        auto b = x * z;
+        auto c = y * x;
+
+        static_assert(
+            std::is_same<decltype(a), inom::i<-16, 36>>::value,
+            "multiplication type mismatch"
+        );
+        static_assert(
+            std::is_same<decltype(b), inom::i<0, 0>>::value,
+            "multiplication type mismatch"
+        );
+        static_assert(
+            std::is_same<decltype(c), decltype(a)>::value,
+            "multiplication type mismatch"
+        );
+        REQUIRE(a == -12_int);
+        REQUIRE(a == c);
+        REQUIRE(b == 0_int);
+    }
+
     SECTION("can be created from a more strict integer") {
         using namespace inom::literals;
         inom::integer<0, 11> x = 5_int;

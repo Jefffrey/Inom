@@ -33,3 +33,14 @@ TEST_CASE("inom::includes_negatives") {
     }
 
 }
+
+TEST_CASE("inom::is_singleton") {
+
+    SECTION("it returns true if the range includes negative numbers") {
+        REQUIRE((inom::is_singleton<inom::integer<0, 23>>::value) == false);
+        REQUIRE((inom::is_singleton<inom::integer<0, 0>>::value) == true);
+        REQUIRE((inom::is_singleton<inom::integer<-6, -6>>::value) == true);
+        REQUIRE((inom::is_singleton<inom::integer<4, 4>>::value) == true);
+    }
+
+}

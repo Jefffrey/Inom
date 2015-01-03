@@ -6,7 +6,7 @@ SUITE_CPP_FILES	:= $(wildcard test/*.cpp)\
 				   $(wildcard test/inom/detail/*.cpp)
 SUITE_OBJ_FILES	:= $(SUITE_CPP_FILES:.cpp=.o)
 LD_FLAGS		:=
-CC_FLAGS		:= -std=c++11 -O2 -ferror-limit=1
+CC_FLAGS		:= -std=c++1y -O2 -ferror-limit=1
 
 suite: $(SUITE_OBJ_FILES)
 	$(CC) $(LD_FLAGS) -o $@ $^
