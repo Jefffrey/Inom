@@ -10,6 +10,14 @@ constexpr std::intmax_t abs(std::intmax_t n) {
     return (n >= 0) ? n : -n; 
 }
 
+template<typename Int>
+constexpr Int power(Int x, unsigned int y) {
+    if(y == 0) return 1;
+
+    Int sub = power(x, y / 2);
+    if (y % 2 == 0) return sub * sub;
+    else return x * sub * sub;
+}
 
 template<typename Predicate, typename Acc>
 constexpr Acc keep_best(Predicate, Acc x) {

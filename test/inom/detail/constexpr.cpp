@@ -4,6 +4,7 @@
 using inom::detail::abs;
 using inom::detail::min;
 using inom::detail::max;
+using inom::detail::power;
 
 TEST_CASE("inom::detail::abs") {
 
@@ -58,6 +59,35 @@ TEST_CASE("inom::detail::max") {
         auto y = max(3, -3, 5, 199, -459, 0);
         REQUIRE(x == 199);
         REQUIRE(y == 199);
+    }
+
+}
+
+TEST_CASE("inom::detail::power") {
+
+    SECTION("it works to the power of 0") {
+        auto x = power(3, 0);
+        auto y = power(-4, 0);
+        REQUIRE(x == 1);
+        REQUIRE(y == 1);
+    }
+
+    SECTION("it works to the power of 1") {
+        auto x = power(3, 1);
+        auto y = power(-4, 1);
+        REQUIRE(x == 3);
+        REQUIRE(y == -4);
+    }
+
+    SECTION("it works for non trivial powers") {
+        auto x = power(3, 4);
+        auto y = power(-2, 9);
+        auto z = power(5LL, 14);
+        auto w = power(265LL, 4);
+        REQUIRE(x == 81);
+        REQUIRE(y == -512);
+        REQUIRE(z == 6.103515625e9);
+        REQUIRE(w == 4.931550625e9);
     }
 
 }
