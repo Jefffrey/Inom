@@ -23,12 +23,23 @@ TEST_CASE("inom::integer") {
         REQUIRE(z.data() == 0);
     }
 
-    SECTION("can be instantiated as a literal") {
+    SECTION("can be instantiated with a literal") {
         using namespace inom::literals;
         auto x = 123_int;
         auto y = 123_int;
         REQUIRE(x == y);
         REQUIRE(x.data() == 123);
+    }
+
+    SECTION("can be instantiated with an hex literal") {
+        using namespace inom::literals;
+        auto x = 0x0_int;
+        auto y = 0xb_int;
+        auto z = 0x347ab3f893f_int;
+        REQUIRE(0xb_int == 11_int);
+        REQUIRE(x.data() == 0);
+        REQUIRE(y.data() == 11);
+        REQUIRE(z.data() == 3606350629183);
     }
 
     SECTION("access to the underlying data") {
