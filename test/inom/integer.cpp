@@ -27,6 +27,14 @@ TEST_CASE("inom::integer") {
         using namespace inom::literals;
         auto x = 123_int;
         auto y = 123_int;
+        static_assert(
+            std::is_same<decltype(x), decltype(y)>::value,
+            "literal type mismatch"
+        );
+        static_assert(
+            std::is_same<decltype(x), inom::i<123>>::value,
+            "literal type mismatch"
+        );
         REQUIRE(x == y);
         REQUIRE(x.data() == 123);
     }
@@ -36,6 +44,18 @@ TEST_CASE("inom::integer") {
         auto x = 0x0_int;
         auto y = 0xb_int;
         auto z = 0x347ab3f893f_int;
+        static_assert(
+            std::is_same<decltype(x), inom::i<0>>::value,
+            "hex literal type mismatch"
+        );
+        static_assert(
+            std::is_same<decltype(y), inom::i<11>>::value,
+            "hex literal type mismatch"
+        );
+        static_assert(
+            std::is_same<decltype(z), inom::i<3606350629183>>::value,
+            "hex literal type mismatch"
+        );
         REQUIRE(0xb_int == 11_int);
         REQUIRE(x.data() == 0);
         REQUIRE(y.data() == 11);
@@ -46,12 +66,28 @@ TEST_CASE("inom::integer") {
         using namespace inom::literals;
         auto x = 0b0001_int;
         auto y = 0b01_int;
-        auto z = 0b011010110001;
-        auto w = 0b0;
+        auto z = 0b011010110001_int;
+        auto w = 0b0_int;
+        static_assert(
+            std::is_same<decltype(x), inom::i<1>>::value,
+            "hex literal type mismatch"
+        );
+        static_assert(
+            std::is_same<decltype(y), inom::i<1>>::value,
+            "hex literal type mismatch"
+        );
+        static_assert(
+            std::is_same<decltype(z), inom::i<1713>>::value,
+            "hex literal type mismatch"
+        );
+        static_assert(
+            std::is_same<decltype(w), inom::i<0>>::value,
+            "hex literal type mismatch"
+        );
         REQUIRE(x.data() == 1);
         REQUIRE(y == x);
-        REQUIRE(z == 1713);
-        REQUIRE(w == 0);
+        REQUIRE(z.data() == 1713);
+        REQUIRE(w.data() == 0);
     }
 
     SECTION("access to the underlying data") {
