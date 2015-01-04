@@ -43,6 +43,19 @@ struct hex_repr<
     static constexpr std::uintmax_t value = C - 'a' + 10;
 };
 
+template<char>
+struct binary_repr;
+
+template<>
+struct binary_repr<'0'> {
+    static constexpr std::uintmax_t value = 0;
+};
+
+template<>
+struct binary_repr<'1'> {
+    static constexpr std::uintmax_t value = 1;
+};
+
 template<
     template<char, typename...> class, 
     std::uintmax_t, std::uintmax_t, 
@@ -93,6 +106,12 @@ template<char Head, char... Number>
 struct strtoi<'0', 'x', Head, Number...> {
     static constexpr std::intmax_t value = 
         str_base<hex_repr, 16, Head, Number...>::value;
+};
+
+template<char Head, char... Number>
+struct strtoi<'0', 'b', Head, Number...> {
+    static constexpr std::intmax_t value = 
+        str_base<binary_repr, 2, Head, Number...>::value;
 };
 
 } // namespace detail

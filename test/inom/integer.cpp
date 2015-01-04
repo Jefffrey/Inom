@@ -42,6 +42,18 @@ TEST_CASE("inom::integer") {
         REQUIRE(z.data() == 3606350629183);
     }
 
+    SECTION("can be instantiated with a binary literal") {
+        using namespace inom::literals;
+        auto x = 0b0001_int;
+        auto y = 0b01_int;
+        auto z = 0b011010110001;
+        auto w = 0b0;
+        REQUIRE(x.data() == 1);
+        REQUIRE(y == x);
+        REQUIRE(z == 1713);
+        REQUIRE(w == 0);
+    }
+
     SECTION("access to the underlying data") {
         using namespace inom::literals;
         inom::integer<-3, 5> x = 2_int;
