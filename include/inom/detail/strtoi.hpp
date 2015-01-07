@@ -7,6 +7,19 @@ namespace inom {
 namespace detail {
 
 template<char C, class Enable = void>
+struct octal_repr;
+
+template<char C>
+struct octal_repr<
+    C,
+    typename std::enable_if<
+        C >= '0' && C <= '7'
+    >::type
+> {
+    static constexpr std::uintmax_t value = C - '0';
+};
+
+template<char C, class Enable = void>
 struct decimal_repr;
 
 template<char C>
@@ -112,6 +125,12 @@ template<char Head, char... Number>
 struct strtoi<'0', 'b', Head, Number...> {
     static constexpr std::intmax_t value = 
         str_base<binary_repr, 2, Head, Number...>::value;
+};
+
+template<char Head, char... Number>
+struct strtoi<'0', Head, Number...> {
+    static constexpr std::intmax_t value = 
+        str_base<octal_repr, 8, Head, Number...>::value;
 };
 
 } // namespace detail

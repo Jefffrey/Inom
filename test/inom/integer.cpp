@@ -90,6 +90,35 @@ TEST_CASE("inom::integer") {
         REQUIRE(w.data() == 0);
     }
 
+    SECTION("can be instantiated with an octal literal") {
+        using namespace inom::literals;
+        auto x = 0001_int;
+        auto y = 00001_int;
+        auto z = 005702753_int;
+        auto w = 00_int;
+
+        static_assert(
+            std::is_same<decltype(x), inom::i<1>>::value,
+            "octal literal type mismatch"
+        );
+        static_assert(
+            std::is_same<decltype(y), inom::i<1>>::value,
+            "octal literal type mismatch"
+        );
+        static_assert(
+            std::is_same<decltype(z), inom::i<1541611>>::value,
+            "octal literal type mismatch"
+        );
+        static_assert(
+            std::is_same<decltype(w), inom::i<0>>::value,
+            "octal literal type mismatch"
+        );
+        REQUIRE(x.data() == 1);
+        REQUIRE(y == x);
+        REQUIRE(z.data() == 1541611);
+        REQUIRE(w.data() == 0);
+    }
+
     SECTION("access to the underlying data") {
         using namespace inom::literals;
         inom::integer<-3, 5> x = 2_int;
