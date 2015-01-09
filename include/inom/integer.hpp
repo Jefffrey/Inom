@@ -3,6 +3,7 @@
 #include <ostream>
 #include <type_traits>
 #include <algorithm>
+#include <limits>
 #include "aliases.hpp"
 #include "detail/repr_for.hpp"
 #include "detail/strtoi.hpp"
@@ -28,6 +29,16 @@ namespace detail {
 
 } // namespace detail
 
+template<intdata_t L, intdata_t R>
+class integer;
+
+template<typename Integer>
+using inferred_integer =
+    integer<
+        std::numeric_limits<Integer>::min(),
+        std::numeric_limits<Integer>::max()
+    >;
+
 template<intdata_t L, intdata_t R = L>
 class integer {
 public:
@@ -51,6 +62,17 @@ private:
     
     template<data_t I>
     friend integer<I> make_int();
+
+    template<
+        typename Integer,
+        std::enable_if_t<
+            (  std::numeric_limits<Integer>::is_integer
+            && std::is_convertible<
+                Integer, typename inferred_integer<Integer>::data_t
+            >::value )
+        , int>
+    >
+    friend inferred_integer<Integer> from_int(const Integer&);
     
     template<data_t A, data_t B>
     friend class integer;
@@ -109,6 +131,19 @@ using i = integer<L, R>;
 template<intdata_t I>
 integer<I> make_int() {
     return integer<I>(I);
+}
+
+template<
+    typename Integer,
+    std::enable_if_t<
+        (  std::numeric_limits<Integer>::is_integer
+        && std::is_convertible<
+            Integer, typename inferred_integer<Integer>::data_t
+        >::value )
+    , int> = 0
+>
+inferred_integer<Integer> from_int(const Integer& i) {
+    return inferred_integer<Integer>(i);
 }
 
 namespace literals {
