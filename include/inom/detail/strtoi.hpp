@@ -1,11 +1,12 @@
 #pragma once
 
-#include "../aliases.hpp"
 #include <type_traits>
 
 namespace inom {
 namespace detail {
 
+// conversion between a char in octal
+// representation and the corresponding integer
 template<char C, class Enable = void>
 struct octal_repr;
 
@@ -19,6 +20,8 @@ struct octal_repr<
     static constexpr std::uintmax_t value = C - '0';
 };
 
+// conversion between a char in decimal
+// representation and the corresponding integer
 template<char C, class Enable = void>
 struct decimal_repr;
 
@@ -32,6 +35,8 @@ struct decimal_repr<
     static constexpr std::uintmax_t value = C - '0';
 };
 
+// conversion between a char in hexadecimal
+// representation and the corresponding integer
 template<char, class Enable = void>
 struct hex_repr;
 
@@ -56,6 +61,8 @@ struct hex_repr<
     static constexpr std::uintmax_t value = C - 'a' + 10;
 };
 
+// conversion between a char in binary
+// representation and the corresponding integer
 template<char>
 struct binary_repr;
 
@@ -69,6 +76,8 @@ struct binary_repr<'1'> {
     static constexpr std::uintmax_t value = 1;
 };
 
+// implementation for conversion between
+// number strings and integers
 template<
     template<char, typename...> class, 
     std::uintmax_t, std::uintmax_t, 
@@ -109,6 +118,8 @@ struct str_base {
         str_base_impl<ReprFn, Base, 0, Str...>::value;
 };
 
+// exported `strtoi` with representation detection between
+// binary, octal, decimal, hexadecimal representations
 template<char Head, char... Number>
 struct strtoi {
     static constexpr std::intmax_t value = 

@@ -4,32 +4,34 @@
 #include <type_traits>
 #include <algorithm>
 #include <limits>
-#include "aliases.hpp"
+#include <cstdint>
 #include "detail/repr_for.hpp"
 #include "detail/strtoi.hpp"
 #include "detail/constexpr.hpp"
 
 namespace inom {
 
+using range_t = std::intmax_t;
+
 namespace detail {
 
-    constexpr intdata_t mul_min(
-        intdata_t a, intdata_t b, 
-        intdata_t c, intdata_t d
+    constexpr range_t mul_min(
+        range_t a, range_t b, 
+        range_t c, range_t d
     ) {
         return min(a * c, a * d, b * c, b * d);
     }
 
-    constexpr intdata_t mul_max(
-        intdata_t a, intdata_t b, 
-        intdata_t c, intdata_t d
+    constexpr range_t mul_max(
+        range_t a, range_t b, 
+        range_t c, range_t d
     ) {
         return max(a * c, a * d, b * c, b * d);
     }
 
 } // namespace detail
 
-template<intdata_t L, intdata_t R>
+template<range_t L, range_t R>
 class integer;
 
 template<typename Integer>
@@ -39,27 +41,33 @@ using inferred_integer =
         std::numeric_limits<Integer>::max()
     >;
 
-template<intdata_t L, intdata_t R = L>
+template<range_t L, range_t R = L>
 class integer {
 public:
-    using data_t = intdata_t;
-    static constexpr data_t lbound = L;
-    static constexpr data_t rbound = R;
+    // bounds
+    static constexpr range_t lbound = L;
+    static constexpr range_t rbound = R;
 private:
+    // aliases
+    using data_t = range_t;
     using offset_t = 
         typename detail::repr_for<
             detail::abs(R - L)
         >::type;
-    static constexpr data_t pivot = L;
 
-    data_t to_data(offset_t offset) const { return pivot + offset; }
-    data_t to_offset(data_t data) const { return data - pivot; }
-
+    // attributes
+    static constexpr range_t pivot = L;
     offset_t offset;
-    
+
+    // conversion
+    data_t to_data(offset_t offset) const { return pivot + offset; }
+    offset_t to_offset(data_t data) const { return data - pivot; }
+
+    // constructors
     explicit integer(data_t data) 
         : offset(to_offset(data)) {}
     
+    // friend declarations
     template<data_t I>
     friend integer<I> make_int();
 
@@ -72,7 +80,7 @@ private:
             >::value )
         , int>
     >
-    friend inferred_integer<Integer> from_int(const Integer&);
+    friend inferred_integer<Integer> from_int(Integer);
     
     template<data_t A, data_t B>
     friend class integer;
@@ -93,14 +101,14 @@ private:
     friend std::ostream& operator<<(std::ostream&, integer<A, B> const&);
 public:
 
-    // Default constructor (0-initialization)
+    // default constructor (0-initialization)
     template<
         bool B = (L <= 0 && R >= 0),
         typename std::enable_if<B, int>::type = 0
     >
     integer() : integer(0) {}
     
-    // Copy and move constructors
+    // copy and move constructors
     template<
         data_t A, data_t B,
         typename std::enable_if<(L <= A && R >= B), int>::type = 0
@@ -109,7 +117,7 @@ public:
     integer(integer const&) = default;
     integer(integer&&) = default;
     
-    // Copy and move assignments
+    // copy and move assignments
     template<
         data_t A, data_t B,
         typename std::enable_if<(A <= L && B >= R), int>::type = 0
@@ -120,19 +128,23 @@ public:
     integer& operator=(integer const&) = default;
     integer& operator=(integer&&) = default;
 
+    // data access
     data_t data() const { 
         return to_data(offset); 
     }
 };
 
-template<intdata_t L, intdata_t R = L>
+// short alias
+template<range_t L, range_t R = L>
 using i = integer<L, R>;
 
-template<intdata_t I>
+// single value constructor
+template<range_t I>
 integer<I> make_int() {
     return integer<I>(I);
 }
 
+// inferred integer construction
 template<
     typename Integer,
     std::enable_if_t<
@@ -146,28 +158,30 @@ inferred_integer<Integer> from_int(const Integer& i) {
     return inferred_integer<Integer>(i);
 }
 
+// literals
 namespace literals {
 
 template <char... Chars>
 integer<detail::strtoi<Chars...>::value> 
 operator "" _int() {
-    constexpr intdata_t I = detail::strtoi<Chars...>::value;
+    constexpr range_t I = detail::strtoi<Chars...>::value;
     return make_int<I>();
 }
 
 } // namespace literals
 
-template<intdata_t A, intdata_t B, intdata_t C, intdata_t D>
+// arithmetic operations
+template<range_t A, range_t B, range_t C, range_t D>
 integer<A + C, B + D> operator+(integer<A, B> const& a, integer<C, D> const& b) {
     return integer<A + C, B + D>(a.data() + b.data());
 }
 
-template<intdata_t A, intdata_t B, intdata_t C, intdata_t D>
+template<range_t A, range_t B, range_t C, range_t D>
 integer<A - D, B - C> operator-(integer<A, B> const& a, integer<C, D> const& b) {
     return integer<A - D, B - C>(a.data() - b.data());
 }
 
-template<intdata_t A, intdata_t B, intdata_t C, intdata_t D>
+template<range_t A, range_t B, range_t C, range_t D>
 integer<
     detail::mul_min(A, B, C, D), 
     detail::mul_max(A, B, C, D)
@@ -179,23 +193,25 @@ operator*(integer<A, B> const& a, integer<C, D> const& b) {
     >(a.data() * b.data());
 }
 
-template<intdata_t A, intdata_t B>
+template<range_t A, range_t B>
 auto operator-(integer<A, B> const& a) {
     using namespace literals;
     return 0_int - a;
 }
 
-template<intdata_t A, intdata_t B, intdata_t C, intdata_t D>
+// comparison operations
+template<range_t A, range_t B, range_t C, range_t D>
 bool operator==(integer<A, B> const& a, integer<C, D> const& b) {
     return a.data() == b.data();
 }
 
-template<intdata_t A, intdata_t B, intdata_t C, intdata_t D>
+template<range_t A, range_t B, range_t C, range_t D>
 bool operator!=(integer<A, B> const& a, integer<C, D> const& b) {
     return !(a == b); 
 }
 
-template<intdata_t A, intdata_t B>
+// printing operations
+template<range_t A, range_t B>
 std::ostream& operator<<(std::ostream& os, integer<A, B> const& x) {
     return (os << x.data());
 }
