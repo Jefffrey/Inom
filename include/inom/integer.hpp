@@ -177,6 +177,26 @@ bool operator!=(integer<A, B> const& a, integer<C, D> const& b) {
     return !(a == b); 
 }
 
+template<range_t A, range_t B, range_t C, range_t D>
+bool operator<(integer<A, B> const& a, integer<C, D> const& b) {
+    return a.data() < b.data();
+}
+
+template<range_t A, range_t B, range_t C, range_t D>
+bool operator<=(integer<A, B> const& a, integer<C, D> const& b) {
+    return a.data() <= b.data();
+}
+
+template<range_t A, range_t B, range_t C, range_t D>
+bool operator>(integer<A, B> const& a, integer<C, D> const& b) {
+    return a.data() > b.data();
+}
+
+template<range_t A, range_t B, range_t C, range_t D>
+bool operator>=(integer<A, B> const& a, integer<C, D> const& b) {
+    return a.data() >= b.data();
+}
+
 // printing operations
 template<range_t A, range_t B>
 std::ostream& operator<<(std::ostream& os, integer<A, B> const& x) {

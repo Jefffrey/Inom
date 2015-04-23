@@ -155,6 +155,19 @@ TEST_CASE("inom::integer") {
         REQUIRE((r != w) == false);
     }
 
+    SECTION("comparison works") {
+        using namespace inom::literals;
+        inom::integer<-34, 298> a = -33_int;
+        inom::integer<300, 2698> b = 323_int;
+        inom::integer<234, 400> c = 323_int;
+        REQUIRE(a < b);
+        REQUIRE(b > a);
+        REQUIRE(b <= c);
+        REQUIRE(b >= c);
+        REQUIRE(c <= b);
+        REQUIRE(c >= b);
+    }
+
     SECTION("addition works") {
         using namespace inom::literals;
         inom::integer<-3, -1> x = -1_int;
