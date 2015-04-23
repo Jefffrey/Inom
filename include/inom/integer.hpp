@@ -13,24 +13,6 @@ namespace inom {
 
 using range_t = std::intmax_t;
 
-namespace detail {
-
-    constexpr range_t mul_min(
-        range_t a, range_t b, 
-        range_t c, range_t d
-    ) {
-        return min(a * c, a * d, b * c, b * d);
-    }
-
-    constexpr range_t mul_max(
-        range_t a, range_t b, 
-        range_t c, range_t d
-    ) {
-        return max(a * c, a * d, b * c, b * d);
-    }
-
-} // namespace detail
-
 template<range_t L, range_t R>
 class integer;
 
@@ -43,11 +25,8 @@ using inferred_integer =
 
 template<range_t L, range_t R = L>
 class integer {
-public:
-    // bounds
-    static constexpr range_t lbound = L;
-    static constexpr range_t rbound = R;
 private:
+
     // aliases
     using data_t = range_t;
     using offset_t = 
@@ -82,24 +61,33 @@ private:
     >
     friend inferred_integer<Integer> from_int(Integer);
     
-    template<data_t A, data_t B>
+    template<range_t A, range_t B>
     friend class integer;
     
-    template<data_t A, data_t B, data_t C, data_t D>
-    friend integer<A + C, B + D> operator+(integer<A, B> const&, integer<C, D> const&);
-    
-    template<data_t A, data_t B, data_t C, data_t D>
-    friend integer<A - D, B - C> operator-(integer<A, B> const&, integer<C, D> const&);
-
-    template<data_t A, data_t B, data_t C, data_t D>
-    friend integer<
-        detail::mul_min(A, B, C, D), 
-        detail::mul_max(A, B, C, D)
-    > operator*(integer<A, B> const&, integer<C, D> const&);
-
-    template<data_t A, data_t B>
-    friend std::ostream& operator<<(std::ostream&, integer<A, B> const&);
 public:
+
+    // bounds
+    static constexpr range_t lbound = L;
+    static constexpr range_t rbound = R;
+
+    // arithmetic operations
+    template<range_t OL, range_t OR>
+    auto operator+(integer<OL, OR> const& rhs) {
+        return integer<L + OL, R + OR>(data() + rhs.data());
+    }
+    
+    template<range_t OL, range_t OR>
+    auto operator-(integer<OL, OR> const& rhs) {
+        return integer<L - OR, R - OL>(data() - rhs.data());
+    }
+
+    template<range_t OL, range_t OR>
+    auto operator*(integer<OL, OR> const& rhs) {
+        return integer<
+            detail::min(L * OL, L * OR, R * OL, R * OR), 
+            detail::max(L * OL, L * OR, R * OL, R * OR)
+        >(data() * rhs.data());
+    }
 
     // default constructor (0-initialization)
     template<
@@ -132,6 +120,7 @@ public:
     data_t data() const { 
         return to_data(offset); 
     }
+
 };
 
 // short alias
@@ -152,7 +141,7 @@ template<
         && std::is_convertible<
             Integer, typename inferred_integer<Integer>::data_t
         >::value )
-    , int> = 0
+        , int> = 0
 >
 inferred_integer<Integer> from_int(const Integer& i) {
     return inferred_integer<Integer>(i);
@@ -171,28 +160,6 @@ operator "" _int() {
 } // namespace literals
 
 // arithmetic operations
-template<range_t A, range_t B, range_t C, range_t D>
-integer<A + C, B + D> operator+(integer<A, B> const& a, integer<C, D> const& b) {
-    return integer<A + C, B + D>(a.data() + b.data());
-}
-
-template<range_t A, range_t B, range_t C, range_t D>
-integer<A - D, B - C> operator-(integer<A, B> const& a, integer<C, D> const& b) {
-    return integer<A - D, B - C>(a.data() - b.data());
-}
-
-template<range_t A, range_t B, range_t C, range_t D>
-integer<
-    detail::mul_min(A, B, C, D), 
-    detail::mul_max(A, B, C, D)
->
-operator*(integer<A, B> const& a, integer<C, D> const& b) {
-    return integer<
-        detail::mul_min(A, B, C, D), 
-        detail::mul_max(A, B, C, D)
-    >(a.data() * b.data());
-}
-
 template<range_t A, range_t B>
 auto operator-(integer<A, B> const& a) {
     using namespace literals;
